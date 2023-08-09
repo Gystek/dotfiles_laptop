@@ -17,7 +17,7 @@ mod_battery() {
 }
 
 mod_date() {
-    date --utc +"%a %d %b, %Y    %H:%M"
+    date +"%a %d %b, %Y    %H:%M"
 }
 
 mod_mem() {

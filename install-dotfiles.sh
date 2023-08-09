@@ -26,3 +26,4 @@ process_file() {
 process_file xorg "$HOME"
 process_file git  "$HOME"
 process_file fish "$HOME/.config/fish"
+process_file emacs "$HOME/.emacs.d/"
