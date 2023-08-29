@@ -16,12 +16,16 @@ mod_battery() {
     printf "%s%s" "$sign" "$level"
 }
 
-mod_date() {
+mod_gregorian_date() {
     date +"%a %d %b, %Y    %H:%M"
+}
+
+mod_hijri_date() {
+    hijridate
 }
 
 mod_mem() {
     free -h | head -n 2 | tail -n 1 | awk -F' ' '{ print $7"/"$2 }'
 }
 
-echo "  $(mod_mem) | $(mod_battery) | $(mod_date)  "
+echo "  $(mod_mem) | $(mod_battery) | ($(mod_hijri_date)) $(mod_gregorian_date)  "

@@ -13,4 +13,9 @@ set PATH /usr/local/bin \
          /usr/bin \
          /usr/local/sbin \
          /usr/sbin \
-         $HOME/.local/bin
+         $HOME/.local/bin \
+	 $HOME/.opam/default/bin \
+	 $HOME/.cargo/bin
+
+# opam configuration
+source /home/gustek/.opam/opam-init/init.fish > /dev/null 2> /dev/null; or true

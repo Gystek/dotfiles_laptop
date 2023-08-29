@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+gcc -Wall -Wextra -Wwrite-strings -O2 -lm -o hijridate hijridate.c -D __ASCII_MONTHS
+sudo cp hijridate /usr/bin/hijridate
