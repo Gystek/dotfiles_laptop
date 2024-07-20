@@ -5,8 +5,10 @@ end
 set fish_greeting ""
 
 function fish_prompt
-    printf "[%s@%s] %s \$ " (whoami) (hostname) (prompt_pwd)
+    printf "\e[0;90m[\e[0;35m%s\e[0;90m@\e[0;32m%s \e[0;34m%s\e[0;90m]\e[0;97m\$ " (whoami) (hostname) (prompt_pwd)
 end
+
+set -gx ORGANIZATION "Gustek <gustek@riseup.net>"
 
 set PATH /usr/local/bin \
          /bin \

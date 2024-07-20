@@ -51,10 +51,10 @@ main (void)
       "Dhū al-Ḥijjah"
 #else
       "Safar",
-      "Rabi' al-Awwal",
-      "Rabi' ath-Thani",
-      "Jumada al-Ula",
-      "Jumada ath-Thaniyah",
+      "Rabi' I",
+      "Rabi' II",
+      "Jumada I",
+      "Jumada II",
       "Rajab",
       "Sha'ban",
       "Ramadan",
@@ -113,7 +113,7 @@ main (void)
   _c -= hijri_julian(iy, im, 1);
   id = (int)_c;
 
-  printf("%d %s %d\n", id - 30, is_months[im - 1], iy);
+  printf("%d %s %d\n", id - 29, is_months[im - 1], iy);
 
   return 0;
 }

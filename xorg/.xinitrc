@@ -1,5 +1,7 @@
-setxkbmap -option caps:escape
-xmodmap -e "keysym Shift_R = Multi_key"
+setxkbmap us -variant workman
+xmodmap -e "keysym Alt_R = Multi_key"
+
+feh --bg-max ~/documents/pictures/Могучая_даль.jpg
 
 while xsetroot -name "$(/home/gustek/sources/dotfiles/dwm/modeline.sh)"
 do
