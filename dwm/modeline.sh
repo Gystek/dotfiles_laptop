@@ -32,8 +32,12 @@ mod_hijri_date() {
     hijridate
 }
 
+mod_ash() {
+    ash
+}
+
 mod_mem() {
     free -h | head -n 2 | tail -n 1 | awk -F' ' '{ print $7"/"$2 }'
 }
 
-echo "  $(mod_mem) | $(mod_battery) | $(mod_day_name) $(mod_hijri_date) ($(mod_gregorian_date)) $(mod_time)  "
+echo "  $(mod_mem) | $(mod_battery) | $(mod_ash) | $(mod_day_name) $(mod_hijri_date) ($(mod_gregorian_date)) $(mod_time)  "

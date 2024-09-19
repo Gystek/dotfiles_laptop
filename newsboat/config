@@ -1,0 +1,20 @@
+unbind-key p
+
+bind-key O prev-unread
+bind-key E next-unread
+
+bind-key p open-in-browser
+bind-key P open-in-browser-and-mark-read
+
+unbind-key o
+bind-key o prev
+unbind-key e
+bind-key e next
+unbind-key n
+bind-key n enqueue
+
+external-url-viewer urlview
+
+macro , open-in-browser
+macro v set browser "mpv"; open-in-browser
+macro f set browser "firefox"; open-in-browser

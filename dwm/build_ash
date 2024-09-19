@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+gcc -Wall -Wextra -Wwrite-strings -O2 -lm -o ash ash.c -D_SHORT_DAYS -D_POLSKI
+sudo cp ash /usr/bin/ash

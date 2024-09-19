@@ -1,0 +1,67 @@
+# adapt keybindings to the workman layout
+
+# map global insert <c-w> <c-r>
+# map global insert <c-c> <c-v>
+# map global insert <c-f> <c-u>
+# map global insert <a-i> <a-;>
+
+map global normal ^ q
+map global normal q e
+map global normal e j
+map global normal <minus> Q
+map global normal Q E
+map global normal E J
+
+map global normal <semicolon> o
+map global normal o k
+map global normal O K
+
+map global normal k n
+map global normal n h
+map global normal K N
+map global normal N H
+
+map global normal H F
+map global normal h f
+map global normal F U
+map global normal f u
+map global normal U I
+map global normal u i
+map global normal i l
+map global normal I L
+unmap global normal l
+unmap global normal L
+
+map global goto n h
+map global goto u i
+map global goto i l
+map global goto o k
+map global goto q e
+map global goto e j
+
+# the rest
+
+add-highlighter -override global/ number-lines -relative -hlcursor -separator '  ' -min-digits 3
+
+colorscheme desertex
+
+eval %sh{kak-lsp --kakoune -s $kak_session}
+
+hook global WinSetOption filetype=(rust) %{
+    lsp-enable-window
+}
+
+map global user l %{:enter-user-mode lsp<ret>} -docstring "LSP mode"
+hook global KakBegin * %{
+    add-highlighter -override global/ number-lines -hlcursor -separator '  ' -min-digits 3
+}
+
+hook global ModeChange .*:(normal|goto) %{
+    remove-highlighter global/number-lines_-hlcursor_-separator_\ \ _-min-digits_3
+    add-highlighter -override global/ number-lines -relative -hlcursor -separator '  ' -min-digits 3
+}
+
+hook global ModeChange .*:insert %{
+    remove-highlighter global/number-lines_-relative_-hlcursor_-separator_\ \ _-min-digits_3
+    add-highlighter -override global/ number-lines -hlcursor -separator '  ' -min-digits 3
+}
