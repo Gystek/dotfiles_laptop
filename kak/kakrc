@@ -43,25 +43,54 @@ map global goto e j
 
 add-highlighter -override global/ number-lines -relative -hlcursor -separator '  ' -min-digits 3
 
-colorscheme desertex
+colorscheme gruvbox-light
 
 eval %sh{kak-lsp --kakoune -s $kak_session}
 
-hook global WinSetOption filetype=(rust) %{
+hook global BufCreate *.typ %{
+    set buffer filetype 'typst'
+}
+
+hook global BufCreate *.tex %{
+    autowrap-enable
+}
+
+hook global BufCreate *.rkt %{
+    set buffer filetype 'scheme'
+}
+
+hook global WinSetOption filetype=rust %{
     lsp-enable-window
 }
 
 map global user l %{:enter-user-mode lsp<ret>} -docstring "LSP mode"
-hook global KakBegin * %{
-    add-highlighter -override global/ number-lines -hlcursor -separator '  ' -min-digits 3
+hook global KakBegin .* %{
+    add-highlighter -override global/ number-lines -relative -hlcursor -separator '  ' -min-digits 3
 }
 
-hook global ModeChange .*:(normal|goto) %{
+set global autowrap_column 68
+
+hook global ModeChange pop:insert:(normal|goto) %{
     remove-highlighter global/number-lines_-hlcursor_-separator_\ \ _-min-digits_3
     add-highlighter -override global/ number-lines -relative -hlcursor -separator '  ' -min-digits 3
 }
 
-hook global ModeChange .*:insert %{
+hook global ModeChange push:(normal|goto):insert %{
     remove-highlighter global/number-lines_-relative_-hlcursor_-separator_\ \ _-min-digits_3
     add-highlighter -override global/ number-lines -hlcursor -separator '  ' -min-digits 3
 }
+
+define-command -override -docstring "lrk-create: create a blank LRK note and edit it" lrk-create %{
+    edit %sh{lrk-create}
+}
+
+define-command -override -docstring "lrk-find-and-link <metadata>...: find one or more LRK notes, matching over <metadata>
+and insert their id in the current buffer" -params 1.. lrk-find-and-link %{
+    zellij-terminal-horizontal lrk-findby %arg{@} "|" while read line; do printf ""execute-keys i%%s<esc>"" ""$line""; done "|" kak -p %val{session}
+}
+
+define-command -override -docstring "lrk-open [<note_id>]: edit note <note_id> or the note under the cursor" -params 0..1 lrk-open %{
+    nop
+}
+
+set global c_include_guard_style "pragma"

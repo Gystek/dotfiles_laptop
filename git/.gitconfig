@@ -4,6 +4,8 @@
     signingkey = "2FDC6432099B36D9"
 [commit]
     gpgsign = true
+[core]
+    editor = "kak"
 [pull]
     rebase = true
 [init]

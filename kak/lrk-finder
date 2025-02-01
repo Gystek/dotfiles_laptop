@@ -1,0 +1,2 @@
+#!/usr/bin/env bash
+lrk-findby ${@:2} | while read line; do printf "execute-keys i%s<esc>" "$line"; done | kak -p $1

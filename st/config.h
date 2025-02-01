@@ -99,29 +99,29 @@ unsigned int tabspaces = 8;
 static const char *colorname[] = {
 	/* 8 normal colors */
 	"#000000",
-	"#ff5555",
-	"#50fa7b",
-	"#f1fa8c",
-	"#bd93f9",
-	"#ff79c6",
-	"#8be9fd",
-	"#bbbbbb",
+	"#cc3e28",
+	"#216609",
+	"#b58900",
+	"#1e6fcc",
+	"#5c21a5",
+	"#158c86",
+	"#aaaaaa",
 
 	/* 8 bright colors */
-	"#44475a",
-	"#ff5555",
-	"#50fa7b",
-	"#f1fa8c",
-	"#bd93f9",
-	"#ff79c6",
-	"#8be9fd",
-	"#ffffff",
+	"#555555",
+	"#cc3e28",
+	"#216609",
+	"#b58900",
+	"#1e6fcc",
+	"#5c21a5",
+	"#158c86",
+	"#aaaaaa",
 
 	[255] = 0,
 
 	/* more colors can be added after 255 to use with DefaultXX */
-	"#282a36",
-	"#f8f8f2",
+	"#fAffff",
+	"#000000",
 };
 
 /*

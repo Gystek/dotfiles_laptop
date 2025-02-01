@@ -1,2 +1,3 @@
 pane_frames false
-
+copy_command: "xclip -selection clipboard"
+theme: "pencil-light"
