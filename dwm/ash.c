@@ -94,6 +94,12 @@ jd_ash (float jd, int *d, int *m, int *y, int *dow)
 	}
     }
 
+  while (*m >= 12)
+  {
+      *y += 1;
+      *m -= 12;
+  }
+
   *d += (int)delta;
 
   return 0;

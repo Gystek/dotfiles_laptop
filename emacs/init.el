@@ -1,215 +1,133 @@
-; Startup
-(require 'calendar)
-
-(if (fboundp 'menu-bar-mode)
-    (menu-bar-mode -1))
-(if (fboundp 'tool-bar-mode)
-    (tool-bar-mode -1))
-(if (fboundp 'scroll-bar-mode)
-    (scroll-bar-mode -1))
+;; Emacs is not MS Word
+(if (fboundp 'menu-bar-mode) (menu-bar-mode -1))
+(if (fboundp 'tool-bar-mode) (tool-bar-mode -1))
+(if (fboundp 'scroll-bar-mode) (scroll-bar-mode -1))
 
 (setq inhibit-startup-message t)
 
+;; Save backup files elsewhere
 (setq backup-directory-alist
-      `(("." . ,(expand-file-name
-                 (concat user-emacs-directory "backups")))))
+      `(("." . ,(expand-file-name (concat user-emacs-directory "backups")))))
 
 (setq vc-make-backup-files t)
- 
-(global-display-line-numbers-mode)
-(set-face-attribute  'line-number-current-line nil :foreground "black")
-(line-number-mode)
-(column-number-mode)
+
+;; Utility functions
+
+(defmacro multi-bind (map &rest bindings)
+  (dolist (binding bindings)
+    `(define-key ,map ,(car binding) ',(cdr binding))))
+
+;; Package management
+(require 'package)
+(add-to-list 'package-archives
+             '("melpa" . "https://melpa.org/packages/") t)
 
 (defvar refreshed nil)
+(defsubst using (&rest packages)
+  "Install the given PACKAGES if they are not already installed"
+  (dolist (package packages)
+    (unless (package-installed-p package)
+      (unless refreshed
+	(setq refreshed t)
+	(package-refresh-contents))
+      (message "Installing %S..." package)
+      (package-install package)
+      (message "Installed %S" package))))
 
-; Ultra-minimalist package manager
-(defmacro using (package)
-  `(unless (package-installed-p ,package)
-     (unless refreshed
-       (setq refreshed t)
-       (package-refresh-contents))
-     (package-install ,package)))
+(using 'magit)
 
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
-(package-initialize)
+(using 'rustic
+       'lsp-mode
+       'lsp-ui)
 
-(using 'ivy) ; Cool minibufer
-(using 'multiple-cursors) ; obvious
-(using 'company) ; Completion
-(using 'magit) ; Git
-(using 'merlin-company) ; OCaml
-(using 'slime) ; Lisp
-(using 'request) ; Web requests library
-(using 'ement) ; Matrix client
-(using 'org-roam) ; Zettelkasten
-(using 'websocket)
-(using 'simple-httpd)
-(using 'org-roam-ui) ; Visualising Zettelkasten
-(using 'projectile) ; Banger
-(using 'fold-this) ; Essential
-(using 'pinentry) ; For commit signing
-(using 'org-books)
+(multi-bind rustic-mode-map
+	    ("M-j" . lsp-ui-imenu)
+            ("M-?" . lsp-find-references)
+            ("C-c C-c l" . flycheck-list-errors)
+            ("C-c C-c a" . lsp-execute-code-action)
+            ("C-c C-c r" . lsp-rename)
+            ("C-c C-c q" . lsp-workspace-restart)
+            ("C-c C-c Q" . lsp-workspace-shutdown)
+            ("C-c C-c s" . lsp-rust-analyzer-status))
 
-(setq org-books-file "~/sources/org/reading.org")
+(setq lsp-rust-analyzer-cargo-watch-command "clippy")
+(setq lsp-eldoc-render-all t)
+(setq lsp-idle-delay 0.6)
+(setq lsp-inlay-hint-enable t)
+(add-hook 'lsp-mode-hook 'lsp-ui-mode)
 
-(pinentry-start)
+(setq lsp-ui-peek-always-show t)
+(setq lsp-ui-sideline-show-hover t)
+(setq lsp-ui-doc-enable nil)
 
-(setq projectile-keymap-prefix (kbd "C-c p"))
-(projectile-global-mode)
+(using 'projectile)
 
-(if (not (file-exists-p "~/sources/notes"))
-    (make-directory "~/sources/notes"))
-(setq org-roam-directory (file-truename "~/sources/notes"))
-(org-roam-db-autosync-mode)
-(setq org-roam-completion-everywhere t)
+(projectile-mode 1)
+(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
 
-(setq inferior-lisp-program "sbcl")
-
+(using 'ivy
+       'which-key)
 (ivy-mode)
-(setq ivy-use-virtual-buffers t)
 (setq enable-recursive-minibuffers t)
 
+(which-key-mode)
+
+(using 'company)
 (add-hook 'after-init-hook 'global-company-mode)
 
-(require 'merlin-company)
+(using 'geiser-mit)
 
-(setq-default magit-process-password-prompt-regexps
-  '("^\\(Enter \\)?[Pp]assphrase\\( for \\(RSA \\)?key '.*'\\)?: ?$"
-    ;; Match-group 99 is used to identify the "user@host" part.
-    "^\\(Enter \\)?[Pp]assword\\( for '\\(https?://\\)?\\(?99:.*\\)'\\)?: ?$"
-    ;; Pinentry Curses box in the terminal when used with GnuPG
-    "Please enter the passphrase for the ssh key"
-    "^.*'s password: ?$"
-    "^Yubikey for .*: ?$"
-    "^Enter PIN for .*: ?$"))
+(using 'haskell-mode
+       'lsp-haskell)
 
+(add-hook 'haskell-mode-hook #'lsp)
+(add-hook 'haskell-literate-mode-hook #'lsp)
 
-; LaTeX
+;; Line numbering and modeline stuff
+(setq display-line-numbers-type 'relative)
+(add-hook 'after-init-hook 'global-display-line-numbers-mode)
 
-(defun latex-compile-buffer ()
-  (interactive)
-  (let ((fname (buffer-file-name (window-buffer (minibuffer-selected-window)))))
-    (save-window-excursion
-      (start-process "Tectonic" nil "tectonic" fname))))
+(setq column-number-mode t)
 
-(defun latex-view-pdf ()
-  (interactive)
-  (let* ((buf (window-buffer (minibuffer-selected-window)))
-	 (fname (file-name-base (buffer-file-name buf))))
-    (save-window-excursion
-      (start-process "Zathura" nil "zathura" (format "%s.pdf" fname)))))
+;; Buffer refresh
+(global-auto-revert-mode 1)
+(setq global-auto-revert-non-file-buffers t)
+(setq auto-revert-verbose nil)
 
-(add-hook 'LaTeX-mode-hook
+;; Shell stuff
+(defun comint-delchar-or-eof-or-kill-buffer (arg)
+  (interactive "p")
+  (if (null (get-buffer-process (current-buffer)))
+      (kill-buffer)
+    (comint-delchar-or-maybe-eof arg)))
+
+(add-hook 'shell-mode-hook
           (lambda ()
-	    (local-unset-key (kbd "C-c C-c"))
-	    (local-set-key (kbd "C-c C-c") #'latex-compile-buffer)))
+            (define-key shell-mode-map
+              (kbd "C-d") 'comint-delchar-or-eof-or-kill-buffer)))
 
-; Org mode
-(setq org-todo-keywords '((sequence "TODO" "|" "DONE")
-			  (sequence "TO LEARN" "LEARNING" "|" "LEARNT")
-			  (sequence "TO READ" "READING" "|" "READ")))
-      
-(setq org-agenda-files '("~/sources/org/"))
-(setq org-latex-compiler "tectonic")
-(setq org-modules (cons 'habit (if (fboundp 'org-modules)
-				   org-modules
-				 nil)))
+;; Latex and PDF files
+(defun zathura-open-file (path)
+  (interactive "f")
+  (start-process "zathura" nil "zathura" path))
 
-(defun flip (f)
-  (lambda (x y)
-    (funcall f y x)))
+(defvar latex-compiler "tectonic")
+(defun latex-compile ()
+  (interactive)
+  (start-process "latex-compile" "*LaTeX compilation*"
+		 latex-compiler (buffer-file-name)))
 
-; Keymaps
-
-(keymap-global-set "C-x C-a" 'switch-to-prev-buffer)
-(global-set-key (kbd "C-c l") #'org-store-link)
-(global-set-key (kbd "C-c a") #'org-agenda)
-(global-set-key (kbd "C-c c") #'org-capture)
-
-(global-set-key (kbd "C-c C-s") 'mc/mark-all-in-region)
-(global-set-key (kbd "C-c C-n") 'mc/mark-next-lines)
-(global-set-key (kbd "C-c C-,") 'mc/keyboard-quit)
-
-(global-set-key (kbd "C-c b") #'(lambda ()
-				  (interactive)
-				  (switch-to-buffer "*scratch*")))
-; Basically a cheap remix of Vim's <f>, <t> and <a>, respectively.
-; TODO: Fix <a> to skip in-between pairs
-
-(defun onto-forward (char)
-  (interactive "sEnd:")
-  (search-forward char))
-(defun onto-backward (char)
-  (interactive "sEnd:")
-  (search-backward char))
-(defun upto-forward (char)
-  (interactive "sEnd:")
-  (onto-forward char)
-  (backward-char))
-(defun upto-backward (char)
-  (interactive "sEnd:")
-  (onto-backward char)
-  (forward-char))
-
-(defun upto-between (od do)
-  (interactive "sStart:\nsEnd:")
-  (upto-backward od)
-  (set-mark-command nil)
-  (upto-forward do))
-
-(defun onto-between (od do)
-  (interactive "sStart:\nsEnd:")
-  (onto-backward od)
-  (set-mark-command nil)
-  (onto-forward do))
-    
-(global-set-key (kbd "C-c C-x C-f") 'onto-forward)
-(global-set-key (kbd "C-c C-x C-b") 'onto-backward)
-(global-set-key (kbd "C-c C-x f") 'upto-forward)
-(global-set-key (kbd "C-c C-x b") 'upto-backward)
-
-(defvar pairs
-  '(("(" . ")")
-    ("[" . "]")
-    ("'" . "'")
-    ("\"" . "\"")
-    ("`" . "'")
-    ("<<" . ">>")
-    ("{" . "}")))
-
-(defun onto-matching (char)
-  (interactive "sFirst char of pair:")
-  (onto-between char (cdr (assoc char pairs))))
-(defun upto-matching (char)
-  (interactive "sFirst char of pair:")
-  (upto-between char (cdr (assoc char pairs))))
-
-(global-set-key (kbd "C-c C-x C-i") 'onto-matching)
-(global-set-key (kbd "C-c C-x i") 'upto-matching)
-
-; Modeline
-
-; Headers
-
-(auto-insert-mode t)
-
-; Custom
+(keymap-global-set "C-c c" 'latex-compile)
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(org-books pinentry fold-this projectile org-roam-ui simple-httpd websocket org-roam ement multiple-cursors merlin-company magit company ivy)))
+   '(haskell-mode lsp-haskell geiser-mit which-key rustic projectile magit lsp-ui ivy company)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
-;; ## added by OPAM user-setup for emacs / base ## 56ab50dc8996d2bb95e7856a6eddb17b ## you can edit, but keep this line
-(require 'opam-user-setup "~/.emacs.d/opam-user-setup.el")
-;; ## end of OPAM user-setup addition for emacs / base ## keep this line
-
-(put 'upcase-region 'disabled nil)
